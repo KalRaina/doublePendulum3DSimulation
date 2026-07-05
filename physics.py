@@ -29,10 +29,10 @@ def calc(x1,x2,y1,
     # does not respect the constraints (as it calculates the way the bob will move in the tangential direction) 
     # so we must impose them
 
-    v1 += a1 * dt
+    v1 += a1 * dt # pretty much v = u + at
     v2 += a2 * dt
 
-    r1 += v1 * dt
+    r1 += v1 * dt # v1 or v2 * dt is diplacement, add that to original position to get new position
     r2 += v2 * dt
 
     r1 = r1 / np.linalg.norm(r1) * l1 # ensures r1 position vector lies on sphere surface with radius l1
@@ -58,14 +58,11 @@ def calc(x1,x2,y1,
 
     dot1 = np.dot(v1, r1) # dot product of position and velocity vector of bob1, velocity in rod direction
 
-    v1 -= (dot1 / (l1*l1)) * r1 
+    v1 -= (dot1 / (l1*l1)) * r1  # convert dot product to vector and subtract
 
     dot2 = np.dot(v2, d)
 
     v2 -= (dot2/(l2**2)) * d
-
-    v1 *= 0.999
-    v2 *= 0.999
 
 
     return (

@@ -2,8 +2,10 @@ let pyodide; // declaration
 
 let motionStarted = false; // so animation doesn't start without everything being loaded
 
-let x1, y1, z1; // declarins variables
+let x1, y1, z1; // declaring variables
 let x2, y2, z2;
+
+let speed = parseFloat(document.getElementById("speed").value);
 
 async function initPyodide() { // loads pyodide, console message so I know
     pyodide = await loadPyodide();
@@ -20,8 +22,8 @@ async function initPyodide() { // loads pyodide, console message so I know
 initPyodide();
 animate(); // calls animate function
 
-let vx1 = 0, vy1 = 3, vz1 = 0;
-let vx2 = 0, vy2 = 3, vz2 = 0; // setting velocities for each bob
+let vx1, vy1, vz1;
+let vx2, vy2, vz2; // setting velocities for each bob
 
 let dt = 0.005; // time step 
 
@@ -52,6 +54,7 @@ function getInputs(){
     const l2 = parseFloat(document.getElementById("l2").value);
 
     const g  = parseFloat(document.getElementById("gravity").value);
+        
 
     return {theta1, phi1, theta2, phi2, l1, l2, g}
 } // function that grabs the user inputted values
@@ -183,8 +186,8 @@ function startMotion() {
     [[x1,y1,z1],[x2,y2,z2]] = anglesToCartesian(theta1, phi1, l1, theta2, phi2, l2);
 
     // set initial velocities (changeable)
-    vx1 = 0; vy1 = 3; vz1 = 0;
-    vx2 = 0; vy2 = 3; vz2 = 0;
+    vx1 = 1; vy1 = 3; vz1 = 1;
+    vx2 = 1; vy2 = 3; vz2 = 1;
 
     // send initial state to Python
     pyodide.globals.set("x1", x1);
@@ -219,6 +222,10 @@ function animate(){
     // hasn't loaded, do not animate
 
     const {theta1, phi1, theta2, phi2, l1, l2, g} = getInputs(); // get user inputted values
+
+    const speed = parseFloat(document.getElementById("speed").value);
+
+    for (let i = 0; i < speed; i++){
 
     const result = pyodide.runPython(
         `calc(x1,x2,y1,y2,z1,z2,vx1,vx2,vy1,vy2,vz1,vz2,l1,l2,g,dt)`
@@ -277,5 +284,6 @@ function animate(){
     renderer.render(scene,camera); // render new frame
     updateTrail(trailPoints1, x1, y1, z1, trailGeo1); // updates trails so old ones go away, new ones 
     updateTrail(trailPoints2, x2, y2, z2, trailGeo2); // that follow motion are animated
+}
 }
 
