@@ -98,6 +98,7 @@ controls.rotateSpeed = 0.5;
 controls.zoomSpeed = 1.0;
 controls.panSpeed = 0.8;
 
+
 // bob 1
 
 const bob1G = new THREE.SphereGeometry(0.2,32,32);
@@ -268,6 +269,7 @@ function animate(){
     pyodide.globals.set("dt", dt);
 
     bob1.position.set(x1,y1,z1); // sets new positions of bobs
+
     bob2.position.set(x2,y2,z2);
 
     rod1.geometry.setFromPoints([
