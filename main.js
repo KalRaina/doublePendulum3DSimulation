@@ -1,17 +1,27 @@
 let pyodide;
 
-async function initPyodide(){
+let motionStarted = false;
 
-    pyodide = await loadPyodide()
-    await pyodide.loadPackage("numpy")
+let x1, y1, z1;
+let x2, y2, z2;
 
-    await pyodide.runPythonAsync(await(await fetch("physics.py")).text())
+async function initPyodide() {
+    pyodide = await loadPyodide();
+
+    await pyodide.loadPackage("numpy");
+
+    const physicsCode = await (await fetch("physics.py")).text();
+    await pyodide.runPythonAsync(physicsCode);
+
+    console.log("Physics loaded!");
+
 }
 
 initPyodide();
+animate();
 
-let vx1 = 3, vy1 = 3, vz1 = 3;
-let vx2 = 3, vy2 = 3, vz2 = 3;
+let vx1 = 0, vy1 = 3, vz1 = 0;
+let vx2 = 0, vy2 = 3, vz2 = 0;
 
 let dt = 0.005;   
 
@@ -52,7 +62,10 @@ scene.background = new THREE.Color(0x000000)
 const camera = new THREE.PerspectiveCamera(
     60, window.innerWidth / window.innerHeight, 0.1, 1000
 )
-camera.position.set(0,0,10)
+
+camera.position.set(0, 2, 8);
+camera.lookAt(0, 0, 0);
+
 
 const renderer = new THREE.WebGLRenderer({
     canvas: document.getElementById("sim"),
@@ -65,6 +78,7 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;   // smooth camera movement
 controls.dampingFactor = 0.1;
 controls.rotateSpeed = 0.5;
+
 controls.zoomSpeed = 1.0;
 controls.panSpeed = 0.8;
 
@@ -111,13 +125,68 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0x404040);
 scene.add(ambient);
 
+document.getElementById("startBtn").addEventListener("click", startMotion);
+
+function startMotion() {
+    const {theta1, phi1, theta2, phi2, l1, l2, g} = getInputs();
+
+    // compute initial positions from angles
+    [[x1,y1,z1],[x2,y2,z2]] = anglesToCartesian(theta1, phi1, l1, theta2, phi2, l2);
+
+    // set initial velocities (changeable)
+    vx1 = 0; vy1 = 3; vz1 = 0;
+    vx2 = 0; vy2 = 3; vz2 = 0;
+
+    // send initial state to Python
+    pyodide.globals.set("x1", x1);
+    pyodide.globals.set("y1", y1);
+    pyodide.globals.set("z1", z1);
+
+    pyodide.globals.set("x2", x2);
+    pyodide.globals.set("y2", y2);
+    pyodide.globals.set("z2", z2);
+
+    pyodide.globals.set("vx1", vx1);
+    pyodide.globals.set("vy1", vy1);
+    pyodide.globals.set("vz1", vz1);
+
+    pyodide.globals.set("vx2", vx2);
+    pyodide.globals.set("vy2", vy2);
+    pyodide.globals.set("vz2", vz2);
+
+    pyodide.globals.set("l1", l1);
+    pyodide.globals.set("l2", l2);
+    pyodide.globals.set("g", g);
+    pyodide.globals.set("dt", dt);
+
+    // start animation
+    motionStarted = true;
+}
+
+
 function animate(){
     requestAnimationFrame(animate);
 
-    if (!pyodide) return;
+    if (!pyodide || !motionStarted) return;
 
     const {theta1, phi1, theta2, phi2, l1, l2, g} = getInputs();
-    const [[x1,y1,z1],[x2,y2,z2]] = anglesToCartesian(theta1, phi1, l1, theta2, phi2, l2);
+
+    const result = pyodide.runPython(
+        `calc(x1,x2,y1,y2,z1,z2,vx1,vx2,vy1,vy2,vz1,vz2,l1,l2,g,dt)`
+    );
+
+    const [
+        newX1, newY1, newZ1,
+        newX2, newY2, newZ2,
+        newVX1, newVY1, newVZ1,
+        newVX2, newVY2, newVZ2
+    ] = result;
+
+    x1 = newX1; y1 = newY1; z1 = newZ1;
+    x2 = newX2; y2 = newY2; z2 = newZ2;
+
+    vx1 = newVX1; vy1 = newVY1; vz1 = newVZ1;
+    vx2 = newVX2; vy2 = newVY2; vz2 = newVZ2;
 
     pyodide.globals.set("x1", x1);
     pyodide.globals.set("y1", y1);
@@ -137,37 +206,23 @@ function animate(){
 
     pyodide.globals.set("l1", l1);
     pyodide.globals.set("l2", l2);
-
     pyodide.globals.set("g", g);
     pyodide.globals.set("dt", dt);
 
-    const result = pyodide.runPython(`calc(x1,x2,y1,y2,z1,z2,vx1,vx2,vy1,vy2,vz1,vz2,l1,l2,g,dt)`)
-
-    const [
-    newX1, newY1, newZ1,
-    newX2, newY2, newZ2,
-    newVX1, newVY1, newVZ1,
-    newVX2, newVY2, newVZ2
-] = result;
-
-    vx1 = newVX1; vy1 = newVY1; vz1 = newVZ1;
-    vx2 = newVX2; vy2 = newVY2; vz2 = newVZ2;
-
-    bob1.position.set(newX1,newY1,newZ1);
-    bob2.position.set(newX2,newY2,newZ2);
+    bob1.position.set(x1,y1,z1);
+    bob2.position.set(x2,y2,z2);
 
     rod1.geometry.setFromPoints([
         new THREE.Vector3(0,0,0),
-        new THREE.Vector3(newX1,newY1,newZ1)
+        new THREE.Vector3(x1,y1,z1)
     ]);
 
     rod2.geometry.setFromPoints([
-        new THREE.Vector3(newX1,newY1,newZ1),
-        new THREE.Vector3(newX2,newY2,newZ2)
+        new THREE.Vector3(x1,y1,z1),
+        new THREE.Vector3(x2,y2,z2)
     ]);
 
     controls.update();
     renderer.render(scene,camera);
-
 }
-animate();
+
