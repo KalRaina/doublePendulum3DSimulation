@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="https://unpkg.com/three@0.146.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    #sim {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: block;
+    }
+
+    #controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0,0,0,0.5);
+        padding: 15px;
+        border-radius: 10px;
+        color: white;
+    }
+
+    #controls input[type="range"] {
+        width: 200px;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    a {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+    }
+</style>
+
+</head>
+
+<body>
+
+<canvas id="sim"></canvas>
+
+
+<div id="controls">
+    <label for="theta1">θ1 (Bob 1 Polar Angle)</label>
+    <input type="range" id="theta1" min="0" max="3.14159" step="0.01" value="1.0">
+
+    <label for="phi1">φ1 (Bob 1 Azimuth Angle)</label>
+    <input type="range" id="phi1" min="0" max="6.28318" step="0.01" value="0.0">
+
+    <label for="theta2">θ2 (Bob 2 Polar Angle)</label>
+    <input type="range" id="theta2" min="0" max="3.14159" step="0.01" value="1.0">
+
+    <label for="phi2">φ2 (Bob 2 Azimuth Angle)</label>
+    <input type="range" id="phi2" min="0" max="6.28318" step="0.01" value="0.0">
+
+    <label for="l1">Rod Length l1</label>
+    <input type="range" id="l1" min="0.1" max="10" step="0.01" value="4">
+
+    <label for="l2">Rod Length l2</label>
+    <input type="range" id="l2" min="0.1" max="10" step="0.01" value="4">
+
+    <label for="gravity">Gravity g</label>
+    <input type="range" id="gravity" min="0" max="20" step="0.01" value="9.81">
+
+    <label for="speed">Speed</label>
+    <input type="range" id="speed" min="1" max="20" step="1" value="1">
+
+    <button id="trailBtn">Toggle infinite trail</button>
+
+    <button id="startBtn">Start Motion</button>
+</div>
+
+<a href="https://github.com/KalRaina/doublePendulum3DSimulation"> View Source</a>
+<script src="main.js"></script>
+
+</body>
+</html>
