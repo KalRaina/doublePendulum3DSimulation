@@ -4,6 +4,8 @@ Press the Start Motion button to begin the simulation.
 
 To trigger a new simulation with different settings, adjust sliders to your liking and then click the Start Motion button to see the simulation with new settings.
 
+Includes ambient audio that changes with speed and gravity of simulation.
+
 You can also change the camera position.
 
 Azimuth angle: the angle measured along the horizontal plane (represented by greek letter phi):
