@@ -8,7 +8,7 @@ Includes ambient audio that changes with speed and gravity of simulation.
 
 You can also change the camera position.
 
-Azimuth angle: the angle measured along the horizontal plane (represented by greek letter phi):
+Azimuth angle: the angle measured from the +x axis counter-clockwise (represented by greek letter phi):
 
 ![](OIP.jfif)
 
