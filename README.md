@@ -12,6 +12,6 @@ Azimuth angle: the angle measured along the horizontal plane (represented by gre
 
 ![](OIP.jfif)
 
-Theta angle, the angle measured from the vertical axis downwards (represented by greek letter theta):
+Theta angle, the angle measured from the +z axis downwards (represented by greek letter theta):
 
 ![](hi.jfif)
